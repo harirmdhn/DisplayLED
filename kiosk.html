@@ -14,15 +14,30 @@
         <span>RACE DAY</span>
       </header>
 
-      <!-- Step 1: name -->
+      <!-- Step 1: details form -->
       <section id="step-form" class="step">
         <h1>Join the grid</h1>
-        <p class="muted">Enter your name to get started.</p>
+        <p class="muted">Fill in your details to get started.</p>
+
         <label class="field">
-          <span>Your name</span>
-          <input id="name" type="text" maxlength="24" autocomplete="off"
-                 placeholder="e.g. Alex" />
+          <span>Full name</span>
+          <input id="name" type="text" maxlength="40" autocomplete="name"
+                 placeholder="e.g. Alex Driver" />
         </label>
+
+        <label class="field">
+          <span>Email</span>
+          <input id="email" type="email" autocomplete="email"
+                 placeholder="you@example.com" />
+        </label>
+
+        <label class="field">
+          <span>Phone number</span>
+          <input id="phone" type="tel" autocomplete="tel"
+                 placeholder="+62 812 3456 7890" />
+        </label>
+
+        <p id="form-error" class="error hidden"></p>
         <button id="to-camera" class="btn primary" disabled>Continue</button>
       </section>
 
@@ -47,11 +62,25 @@
         </div>
         <div class="row">
           <button id="retake" class="btn ghost">Retake</button>
-          <button id="submit" class="btn primary">Send to the big screen</button>
+          <button id="submit" class="btn primary">Submit</button>
         </div>
       </section>
 
-      <!-- Step 4: done -->
+      <!-- Step 4: processing (AI) -->
+      <section id="step-processing" class="step hidden">
+        <div class="spinner"></div>
+        <h1>Please wait,<br />don't close this page</h1>
+        <p class="muted">
+          Your AI photo is being processed, estimated 40–150s.
+        </p>
+        <p id="queue-note" class="queue-note"></p>
+        <p class="event-copy">
+          SIAP BALAPAN?<br />
+          <b>BUKTIKAN DI THE CLEARLY CONTROLLED CIRCUIT</b>
+        </p>
+      </section>
+
+      <!-- Step 5: done -->
       <section id="step-done" class="step hidden">
         <h1>🏆 You're on the grid!</h1>
         <p class="muted">

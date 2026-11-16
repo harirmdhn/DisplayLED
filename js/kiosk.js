@@ -1,10 +1,6 @@
 // ---------------------------------------------------------------------------
-// Kiosk page: name form -> selfie capture -> submit.
+// Kiosk page: details form -> selfie -> submit to AI queue -> wait -> done.
 // ---------------------------------------------------------------------------
-
-import { sendEntry } from './transport.js';
-import { enhanceFace } from './ai.js';
-import { composite } from './composite.js';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -12,10 +8,14 @@ const $ = (sel) => document.querySelector(sel);
 const stepForm = $('#step-form');
 const stepCamera = $('#step-camera');
 const stepPreview = $('#step-preview');
+const stepProcessing = $('#step-processing');
 const stepDone = $('#step-done');
 
-// Form
+// Form fields
 const nameInput = $('#name');
+const emailInput = $('#email');
+const phoneInput = $('#phone');
+const formError = $('#form-error');
 const toCameraBtn = $('#to-camera');
 
 // Camera
@@ -29,24 +29,47 @@ const previewImg = $('#preview-img');
 const retakeBtn = $('#retake');
 const submitBtn = $('#submit');
 
+// Processing
+const queueNote = $('#queue-note');
+
 let stream = null;
-let capturedSelfie = null; // raw selfie data URL
-let personName = '';
+let capturedSelfie = null;
+let details = { name: '', email: '', phone: '' };
+let pollTimer = null;
 
 function show(step) {
-  [stepForm, stepCamera, stepPreview, stepDone].forEach((s) =>
+  [stepForm, stepCamera, stepPreview, stepProcessing, stepDone].forEach((s) =>
     s.classList.add('hidden')
   );
   step.classList.remove('hidden');
 }
 
-// ---- Step 1: form ----
-nameInput.addEventListener('input', () => {
-  toCameraBtn.disabled = nameInput.value.trim().length < 2;
-});
+// ---- Step 1: form validation ----
+function validEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+function validPhone(v) {
+  return v.replace(/[^\d]/g, '').length >= 8;
+}
+function checkForm() {
+  const okName = nameInput.value.trim().length >= 2;
+  const okEmail = validEmail(emailInput.value.trim());
+  const okPhone = validPhone(phoneInput.value.trim());
+  toCameraBtn.disabled = !(okName && okEmail && okPhone);
+}
+[nameInput, emailInput, phoneInput].forEach((el) =>
+  el.addEventListener('input', () => {
+    formError.classList.add('hidden');
+    checkForm();
+  })
+);
 
 toCameraBtn.addEventListener('click', async () => {
-  personName = nameInput.value.trim();
+  details = {
+    name: nameInput.value.trim(),
+    email: emailInput.value.trim(),
+    phone: phoneInput.value.trim(),
+  };
   show(stepCamera);
   await startCamera();
 });
@@ -63,7 +86,7 @@ async function startCamera() {
     await video.play();
   } catch (err) {
     cameraError.textContent =
-      'Could not access the camera. Please allow camera permission and reload. (' +
+      'Could not access the camera. Allow camera permission and reload. The camera only works over HTTPS or on localhost. (' +
       (err && err.name ? err.name : 'error') +
       ')';
     cameraError.classList.remove('hidden');
@@ -78,19 +101,17 @@ function stopCamera() {
 }
 
 shutterBtn.addEventListener('click', () => {
-  // Capture a centered square from the video, resized down for upload.
   const size = Math.min(video.videoWidth, video.videoHeight) || 720;
   const sx = (video.videoWidth - size) / 2;
   const sy = (video.videoHeight - size) / 2;
-  const target = 512; // keep upload small (important for Firestore 1MB limit)
+  const target = 640;
   canvas.width = target;
   canvas.height = target;
   const ctx = canvas.getContext('2d');
-  // Mirror so the selfie looks natural.
   ctx.translate(target, 0);
   ctx.scale(-1, 1);
   ctx.drawImage(video, sx, sy, size, size, 0, 0, target, target);
-  capturedSelfie = canvas.toDataURL('image/jpeg', 0.82);
+  capturedSelfie = canvas.toDataURL('image/jpeg', 0.85);
   stopCamera();
   previewImg.src = capturedSelfie;
   show(stepPreview);
@@ -103,42 +124,81 @@ retakeBtn.addEventListener('click', async () => {
   await startCamera();
 });
 
-submitBtn.addEventListener('click', async () => {
+submitBtn.addEventListener('click', submitToQueue);
+
+async function submitToQueue() {
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Sending…';
+  show(stepProcessing);
+  queueNote.textContent = '';
+
   try {
-    // Option 1 overlay today; enhanceFace is a no-op until AI is enabled.
-    const enhanced = await enhanceFace(capturedSelfie);
-    const photo = await composite(enhanced);
-
-    await sendEntry({
-      name: personName,
-      photo, // composited PNG data URL (head on racing figure)
-      selfie: enhanced, // raw-ish selfie too, handy once AI is added
-      ts: Date.now(),
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: details.name,
+        email: details.email,
+        phone: details.phone,
+        selfie: capturedSelfie,
+      }),
     });
-
-    show(stepDone);
-    $('#done-name').textContent = personName;
+    if (!res.ok) throw new Error('Server rejected the submission (' + res.status + ')');
+    const { id, position } = await res.json();
+    showQueue(position);
+    pollStatus(id);
   } catch (err) {
+    show(stepPreview);
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Send to the big screen';
     alert('Sorry, sending failed: ' + (err && err.message ? err.message : err));
   }
-});
+}
 
+function showQueue(position) {
+  if (position > 0) {
+    queueNote.textContent = `You're #${position + 1} in the queue…`;
+  } else {
+    queueNote.textContent = 'Generating your photo…';
+  }
+}
+
+function pollStatus(id) {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    try {
+      const res = await fetch('/api/status/' + id);
+      if (!res.ok) return;
+      const data = await res.json();
+      showQueue(data.position);
+      if (data.status === 'done') {
+        clearInterval(pollTimer);
+        $('#done-name').textContent = details.name;
+        show(stepDone);
+      } else if (data.status === 'error') {
+        clearInterval(pollTimer);
+        show(stepPreview);
+        submitBtn.disabled = false;
+        alert('AI generation failed: ' + (data.error || 'unknown error'));
+      }
+    } catch {
+      /* keep polling */
+    }
+  }, 2500);
+}
+
+// ---- Step 5: done ----
 $('#again').addEventListener('click', () => {
-  // reset everything for the next person
   capturedSelfie = null;
-  personName = '';
+  details = { name: '', email: '', phone: '' };
   nameInput.value = '';
+  emailInput.value = '';
+  phoneInput.value = '';
   toCameraBtn.disabled = true;
   submitBtn.disabled = false;
-  submitBtn.textContent = 'Send to the big screen';
+  clearInterval(pollTimer);
   show(stepForm);
 });
 
-// Clean up camera if the page is hidden/closed.
 window.addEventListener('pagehide', stopCamera);
 
+checkForm();
 show(stepForm);

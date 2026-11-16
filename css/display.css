@@ -32,7 +32,7 @@
   letter-spacing: 0.12em;
 }
 
-/* Diagonal moving speed lines (used idle + reveal) */
+/* Diagonal moving speed lines (idle + reveal) */
 .speed-lines {
   position: absolute;
   inset: -20%;
@@ -46,9 +46,7 @@
 }
 
 @keyframes slide {
-  to {
-    transform: translateX(-80px);
-  }
+  to { transform: translateX(-80px); }
 }
 
 /* ---------- Reveal stage ---------- */
@@ -58,11 +56,12 @@
   overflow: hidden;
 }
 
+/* Red -> dark sweep + cyan glow, like the billboard background */
 .bg-grid {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, var(--team) 0%, transparent 55%),
-    radial-gradient(circle at 70% 40%, rgba(0, 180, 216, 0.25), transparent 60%);
+  background: linear-gradient(100deg, var(--team) 0%, #2a0a0a 38%, #0a1130 70%),
+    radial-gradient(circle at 72% 45%, rgba(0, 180, 216, 0.22), transparent 55%);
   opacity: 0;
 }
 
@@ -80,46 +79,133 @@
   pointer-events: none;
 }
 
-/* Checkered bars that slide in from the sides */
-.checker {
+/* Diagonal checkered strip across the middle of the board */
+.checker-strip {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 90px;
-  background: repeating-conic-gradient(#fff 0 25%, #000 0 50%) 0 0 / 30px 30px;
-  opacity: 0.85;
-  z-index: 5;
-}
-.checker.left {
-  left: 0;
-  transform: translateX(-120%);
-}
-.checker.right {
-  right: 0;
-  transform: translateX(120%);
+  left: 28%;
+  width: 24%;
+  background: repeating-conic-gradient(
+      rgba(255, 255, 255, 0.9) 0 25%,
+      rgba(0, 0, 0, 0.9) 0 50%
+    )
+    0 0 / 42px 42px;
+  transform: skewX(-12deg) translateX(-140%);
+  opacity: 0.25;
+  z-index: 2;
 }
 
-/* The driver figure (selfie head composited on the racing suit) */
-.figure-wrap {
+/* ---------- Left: product / sponsor slot ---------- */
+.product-slot {
+  position: absolute;
+  left: 4vw;
+  top: 50%;
+  transform: translateY(-50%) translateX(-60px);
+  z-index: 4;
+  opacity: 0;
+}
+
+.product-placeholder {
+  width: 22vw;
+  max-width: 420px;
+  aspect-ratio: 3 / 4;
+  border: 3px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  font-size: clamp(1rem, 2vw, 2rem);
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- Center: headline + QR ---------- */
+.caption {
   position: absolute;
   left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: left;
+  z-index: 6;
+  max-width: 34vw;
+}
+
+.reveal-name {
+  font-size: clamp(2.5rem, 6vw, 6.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+.reveal-tagline {
+  margin-top: 0.4rem;
+  font-size: clamp(1.1rem, 2.4vw, 2.6rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+.qr-slot {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0;
+}
+
+.qr-placeholder {
+  width: 90px;
+  height: 90px;
+  border: 3px solid var(--team2);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: var(--team2);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.qr-slot small {
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- Right: generated figure + living-photo motion ---------- */
+.figure-wrap {
+  position: absolute;
+  right: 4vw;
   bottom: 0;
-  transform: translateX(-50%);
-  height: 88vh;
-  z-index: 4;
+  height: 92vh;
+  z-index: 5;
   display: grid;
   place-items: end center;
 }
 
 .halo {
   position: absolute;
-  bottom: 8%;
-  width: 60vh;
-  height: 60vh;
+  bottom: 10%;
+  width: 55vh;
+  height: 55vh;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(225, 6, 0, 0.55), transparent 65%);
-  filter: blur(10px);
+  filter: blur(12px);
   opacity: 0;
+}
+
+/* Wrapper that carries the continuous "alive" motion once revealed */
+.figure-motion {
+  height: 100%;
+  display: grid;
+  place-items: end center;
+  transform-origin: 50% 85%;
 }
 
 .figure {
@@ -131,38 +217,7 @@
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
 }
 
-/* Caption / name */
-.caption {
-  position: absolute;
-  right: 6vw;
-  top: 50%;
-  transform: translateY(-50%);
-  text-align: right;
-  z-index: 6;
-  max-width: 44vw;
-}
-
-.reveal-name {
-  font-size: clamp(2.5rem, 7vw, 7rem);
-  font-weight: 900;
-  line-height: 0.95;
-  letter-spacing: 0.02em;
-  text-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
-  opacity: 0;
-  transform: translateX(60px);
-}
-
-.reveal-tagline {
-  margin-top: 0.4rem;
-  font-size: clamp(1.1rem, 2.6vw, 2.6rem);
-  font-weight: 800;
-  color: var(--team2);
-  letter-spacing: 0.08em;
-  opacity: 0;
-  transform: translateX(60px);
-}
-
-/* ---------- The choreography (plays when .run is added) ---------- */
+/* ---------- Entrance choreography (when .run is added) ---------- */
 .stage.run .flash {
   animation: flash 0.7s ease-out forwards;
 }
@@ -172,11 +227,11 @@
 .stage.run .reveal-lines {
   animation: fadeIn 0.8s ease-out 0.4s forwards;
 }
-.stage.run .checker.left {
-  animation: slideInL 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+.stage.run .checker-strip {
+  animation: stripIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
 }
-.stage.run .checker.right {
-  animation: slideInR 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s forwards;
+.stage.run .product-slot {
+  animation: productIn 0.7s cubic-bezier(0.2, 0.9, 0.2, 1) 0.9s forwards;
 }
 .stage.run .halo {
   animation: fadeIn 0.8s ease-out 0.6s forwards, pulse 2.4s ease-in-out 1.4s infinite;
@@ -184,11 +239,18 @@
 .stage.run .figure {
   animation: driverIn 1s cubic-bezier(0.2, 0.9, 0.2, 1) 0.45s forwards;
 }
+/* Living-photo motion starts after the figure has arrived */
+.stage.run .figure-motion {
+  animation: livingPhoto 6s ease-in-out 1.6s infinite;
+}
 .stage.run .reveal-name {
   animation: nameIn 0.7s cubic-bezier(0.2, 0.9, 0.2, 1) 1.1s forwards;
 }
 .stage.run .reveal-tagline {
   animation: nameIn 0.7s cubic-bezier(0.2, 0.9, 0.2, 1) 1.45s forwards;
+}
+.stage.run .qr-slot {
+  animation: fadeIn 0.7s ease-out 1.8s forwards;
 }
 
 @keyframes flash {
@@ -200,11 +262,11 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-@keyframes slideInL {
-  to { transform: translateX(0); }
+@keyframes stripIn {
+  to { transform: skewX(-12deg) translateX(0); }
 }
-@keyframes slideInR {
-  to { transform: translateX(0); }
+@keyframes productIn {
+  to { opacity: 1; transform: translateY(-50%) translateX(0); }
 }
 @keyframes driverIn {
   0% { opacity: 0; transform: translateY(40px) scale(0.86); }
@@ -219,8 +281,18 @@
   50% { opacity: 0.85; transform: scale(1.05); }
 }
 
+/* The subtle "moving a little bit" effect: gentle breathe + sway + float */
+@keyframes livingPhoto {
+  0%   { transform: translateY(0) scale(1) rotate(0deg); }
+  25%  { transform: translateY(-6px) scale(1.012) rotate(-0.4deg); }
+  50%  { transform: translateY(0) scale(1.02) rotate(0deg); }
+  75%  { transform: translateY(-4px) scale(1.012) rotate(0.4deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+
 /* Respect reduced-motion users */
 @media (prefers-reduced-motion: reduce) {
   .speed-lines { animation: none; }
+  .stage.run .figure-motion { animation: none; }
   .stage.run * { animation-duration: 0.01ms !important; }
 }

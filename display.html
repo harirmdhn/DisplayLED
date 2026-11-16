@@ -17,22 +17,35 @@
       </div>
     </div>
 
-    <!-- Reveal stage -->
+    <!-- Reveal stage: layout mirrors a billboard (figure right, headline center,
+         product + QR slot left). All copy/branding is generic & swappable. -->
     <div id="stage" class="stage hidden">
       <div class="bg-grid"></div>
       <div class="flash"></div>
       <div class="speed-lines reveal-lines"></div>
-      <div class="checker left"></div>
-      <div class="checker right"></div>
+      <div class="checker-strip"></div>
 
-      <div class="figure-wrap">
-        <div class="halo"></div>
-        <img id="figure" class="figure" alt="" />
+      <!-- Left: product / sponsor slot (swap with your own licensed assets) -->
+      <div class="product-slot">
+        <div class="product-placeholder">YOUR<br />PRODUCT<br />HERE</div>
       </div>
 
+      <!-- Center: headline -->
       <div class="caption">
-        <div id="reveal-name" class="reveal-name">DRIVER</div>
+        <div class="reveal-name"><span id="reveal-name">DRIVER</span></div>
         <div id="reveal-tagline" class="reveal-tagline">IS CLEARLY IN CONTROL</div>
+        <div class="qr-slot">
+          <div class="qr-placeholder">QR</div>
+          <small>Scan &amp; upload your photo</small>
+        </div>
+      </div>
+
+      <!-- Right: the generated figure, with subtle "living photo" motion -->
+      <div class="figure-wrap">
+        <div class="halo"></div>
+        <div class="figure-motion">
+          <img id="figure" class="figure" alt="" />
+        </div>
       </div>
     </div>
 
