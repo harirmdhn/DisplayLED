@@ -58,15 +58,25 @@ async function playNext() {
   playNext();
 }
 
-subscribeEntries(enqueue);
-
-// Let you test the animation without a phone: press "T".
+// Register the test key FIRST, so it works even if the transport backend
+// (Firebase/WebSocket) is misconfigured or offline.
 window.addEventListener('keydown', (e) => {
-  if (e.key.toLowerCase() === 't') {
+  if (e.key && e.key.toLowerCase() === 't') {
     enqueue({
       name: 'Test Driver',
       photo: 'assets/driver.svg',
       ts: Date.now(),
     });
   }
+});
+
+// Subscribe to live entries, but never let a bad/placeholder backend config
+// crash the page (which would also kill the test key above).
+try {
+  subscribeEntries(enqueue);
+} catch (err) {
+  console.warn('Live transport not available yet:', err);
+}
+window.addEventListener('unhandledrejection', (e) => {
+  console.warn('Transport subscription failed (ok for local test):', e.reason);
 });

@@ -10,7 +10,7 @@
 
 export const CONFIG = {
   // Pick your backend here:
-  TRANSPORT: 'firebase', // 'firebase' | 'websocket'
+  TRANSPORT: 'websocket', // 'firebase' | 'websocket'
 
   // Option B only: where the WebSocket server lives.
   // Leave as '' to auto-detect from the current page's host (recommended when
