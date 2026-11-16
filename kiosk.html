@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Join the Grid</title>
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/kiosk.css" />
+  </head>
+  <body class="kiosk">
+    <div class="kiosk-shell">
+      <header class="kiosk-head">
+        <span class="flag">🏁</span>
+        <span>RACE DAY</span>
+      </header>
+
+      <!-- Step 1: name -->
+      <section id="step-form" class="step">
+        <h1>Join the grid</h1>
+        <p class="muted">Enter your name to get started.</p>
+        <label class="field">
+          <span>Your name</span>
+          <input id="name" type="text" maxlength="24" autocomplete="off"
+                 placeholder="e.g. Alex" />
+        </label>
+        <button id="to-camera" class="btn primary" disabled>Continue</button>
+      </section>
+
+      <!-- Step 2: camera -->
+      <section id="step-camera" class="step hidden">
+        <h1>Smile 📸</h1>
+        <p class="muted">Fit your face in the circle, then tap to capture.</p>
+        <div class="camera-wrap">
+          <video id="video" playsinline muted></video>
+          <div class="face-guide"></div>
+        </div>
+        <p id="camera-error" class="error hidden"></p>
+        <button id="shutter" class="btn primary">Capture</button>
+        <canvas id="capture-canvas" class="hidden"></canvas>
+      </section>
+
+      <!-- Step 3: preview -->
+      <section id="step-preview" class="step hidden">
+        <h1>Looking good?</h1>
+        <div class="preview-wrap">
+          <img id="preview-img" alt="Your selfie preview" />
+        </div>
+        <div class="row">
+          <button id="retake" class="btn ghost">Retake</button>
+          <button id="submit" class="btn primary">Send to the big screen</button>
+        </div>
+      </section>
+
+      <!-- Step 4: done -->
+      <section id="step-done" class="step hidden">
+        <h1>🏆 You're on the grid!</h1>
+        <p class="muted">
+          Nice one, <b id="done-name"></b>. Look up at the big screen!
+        </p>
+        <button id="again" class="btn ghost">Submit another</button>
+      </section>
+    </div>
+
+    <script type="module" src="js/kiosk.js"></script>
+  </body>
+</html>

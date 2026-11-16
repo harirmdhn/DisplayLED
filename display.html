@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>F1 Billboard — Big Screen</title>
+    <link rel="stylesheet" href="css/common.css" />
+    <link rel="stylesheet" href="css/display.css" />
+  </head>
+  <body class="display">
+    <!-- Idle loop shown between reveals -->
+    <div id="idle" class="idle">
+      <div class="idle-inner">
+        <div class="speed-lines"></div>
+        <h1 class="idle-title"><span class="flag">🏁</span> <span id="brand-title">RACE DAY</span></h1>
+        <p class="idle-sub">Scan the QR code &amp; send your face to the grid</p>
+      </div>
+    </div>
+
+    <!-- Reveal stage -->
+    <div id="stage" class="stage hidden">
+      <div class="bg-grid"></div>
+      <div class="flash"></div>
+      <div class="speed-lines reveal-lines"></div>
+      <div class="checker left"></div>
+      <div class="checker right"></div>
+
+      <div class="figure-wrap">
+        <div class="halo"></div>
+        <img id="figure" class="figure" alt="" />
+      </div>
+
+      <div class="caption">
+        <div id="reveal-name" class="reveal-name">DRIVER</div>
+        <div id="reveal-tagline" class="reveal-tagline">IS CLEARLY IN CONTROL</div>
+      </div>
+    </div>
+
+    <script type="module" src="js/display.js"></script>
+  </body>
+</html>

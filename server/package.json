@@ -1,0 +1,16 @@
+{
+  "name": "f1-billboard-server",
+  "version": "1.0.0",
+  "description": "Option B: Node + WebSocket server that serves the static app and relays submissions to the big screen in real time.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
